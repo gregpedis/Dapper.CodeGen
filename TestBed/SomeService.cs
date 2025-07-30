@@ -1,16 +1,12 @@
 ﻿using Dapper;
 using Dapper.CodeGen.Markers;
-using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace TestBed;
 
 public partial class SomeService : IDapperRepository<Product>
 {
-	private static readonly SqlConnection _connection = new("connectionString");
-
-	public IDbConnection GetConnection()
-		=> _connection;
+	public IDbConnection GetConnection() => null;
 
 	[DapperOperation]
 	public partial List<Product> GetByName(string name);
@@ -18,7 +14,7 @@ public partial class SomeService : IDapperRepository<Product>
 	public List<Product> GetByNamedWithoutCodeGeneration(string name)
 	{
 		var sql = "SELECT * FROM Product as p WHERE p.name = @name";
-		var result = _connection.Query<Product>(sql, new { name });
+		var result = GetConnection().Query<Product>(sql, new { name });
 		return result.ToList();
 	}
 }

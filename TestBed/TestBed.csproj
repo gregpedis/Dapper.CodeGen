@@ -9,8 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Dapper" Version="2.1.66" />
-	  <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.0" />
+		<PackageReference Include="Dapper" Version="2.1.66" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -20,11 +19,6 @@
 	<ItemGroup>
 		<None Include="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
 		<Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Generated\" />
-	  <Folder Include="Generated\Dapper.CodeGen\Dapper.CodeGen.Generators.DapperQueryGenerator\" />
 	</ItemGroup>
 
 </Project>
