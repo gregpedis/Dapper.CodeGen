@@ -17,4 +17,5 @@ Dapper Source Generator to simplify CRUD operations.
 
 - [Incremental Generator Guide]( https://andrewlock.net/creating-a-source-generator-part-1-creating-an-incremental-source-generator/)
 - [Dapper](https://www.learndapper.com/#is-dapper-an-orm)
+- [CrudRepository](https://micronaut-projects.github.io/micronaut-data/2.4.4/api/io/micronaut/data/repository/CrudRepository.html)
 

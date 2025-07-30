@@ -46,9 +46,10 @@ public class DapperQueryGenerator : IIncrementalGenerator
 			.ToArray();
 
 		return new(
-			classSymbol.FullNameWithoutGenerics(),
+			classSymbol.ContainingNamespace.ToDisplayString(),
+			classSymbol.Name,
 			methodInputs,
-			GetDtoInput(dapperEntity));
+			GetEntityInput(dapperEntity, context.SemanticModel));
 	}
 
 	private static void Execute(SourceProductionContext context, CodeGenInput? codeGenInput)
@@ -61,20 +62,40 @@ public class DapperQueryGenerator : IIncrementalGenerator
 		}
 	}
 
-	// From DTO, get:
-	// 	TableName
-	// IdColumnName
-	// TableColumnNames
-	private static DtoCodeGenInput GetDtoInput(ITypeSymbol entity)
+	private static EntityCodeGenInput GetEntityInput(ITypeSymbol entity, SemanticModel model)
 	{
-		// TODO: Should look for the entity attribute and extract the name
-		// TODO: Should look for a property marked with the id attribute OR called "ID". (Add attribute)
-		// TODO: Should look for all the property names and see if they are marked. (Add attribute)
-		return new DtoCodeGenInput(
-			entity.GetEntityTableName(),
-			"id",
-			ImmutableArray.Create("foo"));
+		var columnProperties = entity.GetColumnProperties();
+
+		var propertiesToColumns = columnProperties
+			.ToImmutableDictionary(
+			x => x.Name,
+			x => x.GetColumnName(model));
+
+		return new EntityCodeGenInput(
+			entity.FullNameWithoutGenerics(),
+			entity.GetEntityTableName(model),
+			GetIdColumnName(columnProperties, propertiesToColumns),
+			propertiesToColumns);
 	}
 
-	public const string GeneratedNamespace = "Dapper.CodeGen.Repositories";
+	private static string GetIdColumnName(
+		IPropertySymbol[] columnProperties,
+		ImmutableDictionary<string, string> propertiesToColumns)
+	{
+		// Try to find via the [DapperId] attribute the correct property/column.
+		if (Array.Find(columnProperties, x => x.IsIdColumn()) is { }  idColumn)
+		{
+			if (propertiesToColumns.TryGetValue(idColumn.Name, out var found))
+			{
+				return found;
+			}
+		}
+		// Otherwise, just try to find via the [DapperColumn] attribute a property called id.
+		else if (propertiesToColumns.Keys.FirstOrDefault(x => x.ToLower() == "id") is { } found)
+		{
+			return propertiesToColumns[found];
+		}
+
+		return string.Empty;
+	}
 }

@@ -68,8 +68,6 @@ public class MarkerGenerator : IIncrementalGenerator
 			[System.AttributeUsage(System.AttributeTargets.Property)]
 			public sealed class {{nameof(DapperIdAttribute)}} : System.Attribute
 			{
-				public string Name { get; set; }
-
 				// Marker class, nothing to see here.
 			}
 		}

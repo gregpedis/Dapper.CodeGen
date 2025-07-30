@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 
 namespace Dapper.CodeGen.Extensions;
 
@@ -38,7 +39,7 @@ public static class RoslynExtensions
 			.Where(x => x.Kind == SymbolKind.Method)
 			.Cast<IMethodSymbol>()
 			.Where(IsPartial)
-			.Where(x => x.GetAttributes().Any(x => x.AttributeClass.Is(TargetMethodAttributeName)))
+			.Where(x => x.GetAttributes().Any(x => x.AttributeClass.Is(DapperOperationAttributeName)))
 			.ToArray();
 
 		return methods;
@@ -48,26 +49,55 @@ public static class RoslynExtensions
 			&& RoslynExtensions.IsPartial(syntax);
 	}
 
-	public static string GetEntityTableName(this ITypeSymbol entity)
+	public static IPropertySymbol[] GetColumnProperties(this ITypeSymbol entity)
 	{
-		var thingy = entity
-			.GetAttributes()
-			.FirstOrDefault(x => x.AttributeClass.Is(DapperEntityAttributeName));
-
-		// "DapperEntity(Name = "product")"
-		var a = thingy.ApplicationSyntaxReference.GetSyntax().ToFullString();
-		// use RegexExtensions
-
-		return "";
+		return entity.GetMembers()
+			.Where(x => x.Kind == SymbolKind.Property)
+			.Cast<IPropertySymbol>()
+			.Where(x => x.GetAttributes().Any(x => x.AttributeClass.Is(DapperColumnAttributeName)))
+			.ToArray();
 	}
 
-	public static bool Is(this ITypeSymbol type, string fullName) =>
+	public static string GetEntityTableName(this ITypeSymbol entity, SemanticModel model) =>
+		entity.GetSqlName(DapperEntityAttributeName, model);
+
+	public static string GetColumnName(this IPropertySymbol column, SemanticModel model) =>
+		column.GetSqlName(DapperColumnAttributeName, model);
+
+	public static bool IsIdColumn(this IPropertySymbol id) =>
+		id.GetAttributes().Any(x => x.Equals(DapperIdAttributeName));
+
+	private static string GetSqlName(this ISymbol appliedTo, string attributeName, SemanticModel model)
+	{
+		var entityAttribute = appliedTo
+			.GetAttributes()
+			.FirstOrDefault(x => x.AttributeClass.Is(attributeName));
+		var syntax = entityAttribute.ApplicationSyntaxReference.GetSyntax() as AttributeSyntax;
+
+		return syntax.GetNameArgumentConstantValue(model) ?? appliedTo.Name.ToSqlName();
+	}
+
+	private static string GetNameArgumentConstantValue(this AttributeSyntax attribute, SemanticModel model)
+	{
+		if (attribute.ArgumentList is { } list
+			&& list.Arguments.Count > 0)
+		{
+			var maybeValue = model.GetConstantValue(list.Arguments[0].Expression);
+			return maybeValue.HasValue ? (string)maybeValue.Value : null;
+		}
+		return null;
+	}
+
+	private static bool Is(this ITypeSymbol type, string fullName) =>
 		type.FullNameWithoutGenerics() == fullName;
 
-	private const string TargetMethodAttributeName = $"{MarkerGenerator.GeneratedNamespace}.{nameof(MarkerGenerator.DapperOperationAttribute)}";
+	private const string DapperOperationAttributeName = $"{MarkerGenerator.GeneratedNamespace}.{nameof(MarkerGenerator.DapperOperationAttribute)}";
 
 	private const string IDapperRepositoryFullName = $"{MarkerGenerator.GeneratedNamespace}.{nameof(MarkerGenerator.IDapperRepository)}";
 
 	private const string DapperEntityAttributeName = $"{MarkerGenerator.GeneratedNamespace}.{nameof(MarkerGenerator.DapperEntityAttribute)}";
 
+	private const string DapperIdAttributeName = $"{MarkerGenerator.GeneratedNamespace}.{nameof(MarkerGenerator.DapperIdAttribute)}";
+
+	private const string DapperColumnAttributeName = $"{MarkerGenerator.GeneratedNamespace}.{nameof(MarkerGenerator.DapperColumnAttribute)}";
 }
