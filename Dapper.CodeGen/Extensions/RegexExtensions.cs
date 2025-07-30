@@ -9,8 +9,7 @@ namespace Dapper.CodeGen.Extensions
 
 	public static class RegexExtensions
 	{
-
-		public void Foo()
+		public static void Foo()
 		{
 			var x = new Regex("Name\\s*=\\s*\"\"(?<value>[^\"\"]+)\"\"");
 		}
