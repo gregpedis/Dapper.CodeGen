@@ -1,5 +1,8 @@
 # Dapper.CodeGen
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=gregpedis_dapper-codegen&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=gregpedis_dapper-codegen)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=gregpedis_dapper-codegen&metric=coverage)](https://sonarcloud.io/component_measures?id=gregpedis_dapper-codegen&metric=coverage)
+
 Dapper Source Generator to simplify CRUD operations.
 
 
