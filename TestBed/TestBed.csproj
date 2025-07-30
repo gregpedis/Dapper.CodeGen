@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>library</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Dapper" Version="2.1.66" />
+	  <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Analyzer Include="..\Dapper.CodeGen\bin\Debug\netstandard2.0\Dapper.CodeGen.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+		<Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Generated\" />
+	  <Folder Include="Generated\Dapper.CodeGen\Dapper.CodeGen.Generators.DapperQueryGenerator\" />
+	</ItemGroup>
+
+</Project>
