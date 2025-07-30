@@ -5,6 +5,13 @@
 
 Dapper Source Generator to simplify CRUD operations.
 
+## TODO
+
+- Setup nuget publish
+- Finish extracting DtoCodeGenInput
+- Add default code generation for standard CRUD operations
+- Add code generation for select
+- Add code generation for the rest of CRUD operations
 
 ## Links
 
